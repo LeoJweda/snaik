@@ -24,30 +24,26 @@ class Point:
     self.x = x
     self.y = y
 
-  def __eq__(self, value):
-    return self.__class__ == value.__class__ and self.x == value.x and self.y == value.y
+  def __add__(self, other):
+    return Point(self.x + other.x, self.y + other.y)
+
+  def __eq__(self, other):
+    return self.__class__ == other.__class__ and self.x == other.x and self.y == other.y
 
 class Snake:
+  DIRECTION = ('up', 'right', 'down', 'left')
+  MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
+
   def __init__(self, position, direction='right'):
     self.squares = [position]
     self.direction = direction
     self.alive = True
 
   def move(self, food):
-    new_square = Point(self.head().x, self.head().y)
+    new_square = self.head() + self.MOVEMENT[self.direction]
 
-    if self.direction == 'up' and new_square.y > 0:
-      new_square.y -= 1
-    elif self.direction == 'right' and new_square.x < WIDTH - 1:
-      new_square.x += 1
-    elif self.direction == 'down' and new_square.y < HEIGHT - 1:
-      new_square.y += 1
-    elif self.direction == 'left' and new_square.x > 0:
-      new_square.x -= 1
-    else:
-      self.alive = False
-
-    if new_square in self.squares:
+    if (new_square in self.squares or
+    new_square.x < 0 or new_square.x > WIDTH or new_square.y < 0 or new_square.y > HEIGHT):
       self.alive = False
 
     if new_square == food.position:
@@ -58,10 +54,7 @@ class Snake:
     self.squares.append(new_square)
 
   def turn(self, direction):
-    if ((direction == 'up' and self.direction != 'down') or
-    (direction == 'right' and self.direction != 'left') or
-    (direction == 'down' and self.direction != 'up') or
-    (direction == 'left' and self.direction != 'right')):
+    if (self.DIRECTION.index(self.direction) != (self.DIRECTION.index(direction) + 2) % 4):
       self.direction = direction
 
   def head(self):
