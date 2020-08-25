@@ -1,24 +1,6 @@
 import random
 import pygame
 
-BACKGROUND_COLOR = '#403D3E'
-SNAKE_COLOR = '#D97979'
-FOOD_COLOR = '#F2167D'
-
-SQUARE_BORDER_WIDTH = 2
-SQUARE_SIDE_LENGTH = 20
-
-SQUARE_TOTAL_SIDE_LENGTH = SQUARE_SIDE_LENGTH + SQUARE_BORDER_WIDTH * 2
-
-HEIGHT = 30
-WIDTH = 40
-
-SCREEN_HEIGHT = HEIGHT * SQUARE_TOTAL_SIDE_LENGTH
-SCREEN_WIDTH = WIDTH * SQUARE_TOTAL_SIDE_LENGTH
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Snaik")
-
 class Point:
   def __init__(self, x, y):
     self.x = x
@@ -31,6 +13,11 @@ class Point:
     return self.__class__ == other.__class__ and self.x == other.x and self.y == other.y
 
 class Square:
+  SQUARE_BORDER_WIDTH = 2
+  SQUARE_SIDE_LENGTH = 20
+
+  SQUARE_TOTAL_SIDE_LENGTH = SQUARE_SIDE_LENGTH + SQUARE_BORDER_WIDTH * 2
+
   def __init__(self, color, position):
     self.__color = color
     self.position = position
@@ -43,28 +30,29 @@ class Square:
       surface,
       self.__color,
       (
-        self.position.x * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
-        self.position.y * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
-        SQUARE_SIDE_LENGTH,
-        SQUARE_SIDE_LENGTH
+        self.position.x * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
+        self.position.y * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
+        self.SQUARE_SIDE_LENGTH,
+        self.SQUARE_SIDE_LENGTH
       )
     )
 
 class Snake:
+  COLOR = '#D97979'
   DIRECTION = ('up', 'right', 'down', 'left')
   MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
 
   def __init__(self, position, direction='right'):
-    self.__squares = [Square(SNAKE_COLOR, position)]
+    self.__squares = [Square(self.COLOR, position)]
     self.__direction = direction
     self.is_alive = True
 
   def move(self, food):
-    new_square = Square(SNAKE_COLOR, self.__squares[-1].position + self.MOVEMENT[self.__direction])
+    new_square = Square(self.COLOR, self.__squares[-1].position + self.MOVEMENT[self.__direction])
 
     if (new_square in self.__squares or
-    new_square.position.x < 0 or new_square.position.x > WIDTH or
-    new_square.position.y < 0 or new_square.position.y > HEIGHT):
+    new_square.position.x < 0 or new_square.position.x >= WIDTH or
+    new_square.position.y < 0 or new_square.position.y >= HEIGHT):
       self.is_alive = False
 
     if new_square.position != food.square.position:
@@ -83,11 +71,24 @@ class Snake:
       square.draw(surface)
 
 class Food:
+  COLOR = '#F2167D'
+
   def __init__(self):
-    self.square = Square(FOOD_COLOR, Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
+    self.square = Square(self.COLOR, Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
 
   def draw(self, surface):
     self.square.draw(surface)
+
+BACKGROUND_COLOR = '#403D3E'
+
+HEIGHT = 30
+WIDTH = 40
+
+SCREEN_HEIGHT = HEIGHT * Square.SQUARE_TOTAL_SIDE_LENGTH
+SCREEN_WIDTH = WIDTH * Square.SQUARE_TOTAL_SIDE_LENGTH
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Snaik")
 
 def draw_window(screen, snake, food):
   screen.fill(BACKGROUND_COLOR)
