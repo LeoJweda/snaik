@@ -30,23 +30,44 @@ class Point:
   def __eq__(self, other):
     return self.__class__ == other.__class__ and self.x == other.x and self.y == other.y
 
+class Square:
+  def __init__(self, position, color):
+    self.position = position
+    self.__color = color
+
+  def __eq__(self, other):
+    return self.__class__ == other.__class__ and self.position == other.position
+
+  def draw(self, surface):
+    pygame.draw.rect(
+      surface,
+      self.__color,
+      (
+        self.position.x * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
+        self.position.y * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
+        SQUARE_SIDE_LENGTH,
+        SQUARE_SIDE_LENGTH
+      )
+    )
+
 class Snake:
   DIRECTION = ('up', 'right', 'down', 'left')
   MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
 
   def __init__(self, position, direction='right'):
-    self.__squares = [position]
+    self.__squares = [Square(position, SNAKE_COLOR)]
     self.__direction = direction
     self.is_alive = True
 
   def move(self, food):
-    new_square = self.__squares[-1] + self.MOVEMENT[self.__direction]
+    new_square = Square(self.__squares[-1].position + self.MOVEMENT[self.__direction], SNAKE_COLOR)
 
     if (new_square in self.__squares or
-    new_square.x < 0 or new_square.x > WIDTH or new_square.y < 0 or new_square.y > HEIGHT):
+    new_square.position.x < 0 or new_square.position.x > WIDTH or
+    new_square.position.y < 0 or new_square.position.y > HEIGHT):
       self.is_alive = False
 
-    if new_square == food.position:
+    if new_square.position == food.square.position:
       food.eat()
     else:
       self.__squares.pop(0)
@@ -57,33 +78,21 @@ class Snake:
     if (self.DIRECTION.index(self.__direction) != (self.DIRECTION.index(direction) + 2) % 4):
       self.__direction = direction
 
-  def draw(self, screen):
+  def draw(self, surface):
     for square in self.__squares:
-      draw_square(screen, SNAKE_COLOR, square)
+      square.draw(surface)
 
 class Food:
   def __init__(self, position):
-    self.position = position
+    self.square = Square(position, FOOD_COLOR)
     self.is_eaten = False
 
   def eat(self):
     self.is_eaten = True
 
-  def draw(self, screen):
+  def draw(self, surface):
     if not self.is_eaten:
-      draw_square(screen, FOOD_COLOR, self.position)
-
-def draw_square(surface, color, position):
-  pygame.draw.rect(
-    screen,
-    color,
-    (
-      position.x * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
-      position.y * SQUARE_TOTAL_SIDE_LENGTH + SQUARE_BORDER_WIDTH,
-      SQUARE_SIDE_LENGTH,
-      SQUARE_SIDE_LENGTH
-    )
-  )
+      self.square.draw(surface)
 
 def draw_window(screen, snake, food):
   screen.fill(BACKGROUND_COLOR)
