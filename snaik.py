@@ -38,7 +38,7 @@ class Square:
     )
 
 class Snake:
-  COLOR = '#D97979'
+  COLOR = '#000000'
 
   DIRECTIONS = {
     pygame.K_UP: {'name': 'up', 'movement': Point(0, -1), 'opposite': 'down'},
@@ -76,7 +76,7 @@ class Snake:
       square.draw(surface)
 
 class Food:
-  COLOR = '#F2167D'
+  COLOR = '#377b3e'
 
   def __init__(self):
     self.square = Square(self.COLOR, Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
@@ -84,7 +84,7 @@ class Food:
   def draw(self, surface):
     self.square.draw(surface)
 
-BACKGROUND_COLOR = '#403D3E'
+BACKGROUND_COLOR = '#ffffff'
 
 HEIGHT = 30
 WIDTH = 40
@@ -111,6 +111,7 @@ def main(win):
   clock = pygame.time.Clock()
 
   run = True
+  next_directions = []
   while run:
     pygame.time.delay(120)
     clock.tick(120)
@@ -121,7 +122,10 @@ def main(win):
         break
 
       if (event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS):
-        snake.turn(event.key)
+        next_directions.append(event.key)
+
+    if (len(next_directions) > 0):
+      snake.turn(next_directions.pop())
 
     if snake.move(food) == food.square.position:
       food = Food()
