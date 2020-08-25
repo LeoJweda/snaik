@@ -40,7 +40,7 @@ class Snake:
     self.alive = True
 
   def move(self, food):
-    new_square = self.head() + self.MOVEMENT[self.direction]
+    new_square = self.squares[-1] + self.MOVEMENT[self.direction]
 
     if (new_square in self.squares or
     new_square.x < 0 or new_square.x > WIDTH or new_square.y < 0 or new_square.y > HEIGHT):
@@ -57,9 +57,6 @@ class Snake:
     if (self.DIRECTION.index(self.direction) != (self.DIRECTION.index(direction) + 2) % 4):
       self.direction = direction
 
-  def head(self):
-    return self.squares[-1]
-
   def draw(self, screen):
     for square in self.squares:
       draw_square(screen, SNAKE_COLOR, square)
@@ -68,9 +65,6 @@ class Food:
   def __init__(self, position):
     self.position = position
     self.eaten = False
-
-  def position(self):
-    return (self.position)
 
   def eat(self):
     self.eaten = True
