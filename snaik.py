@@ -39,16 +39,21 @@ class Square:
 
 class Snake:
   COLOR = '#D97979'
-  DIRECTION = ('up', 'right', 'down', 'left')
-  MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
+
+  DIRECTIONS = {
+    pygame.K_UP: {'name': 'up', 'movement': Point(0, -1), 'opposite': 'down'},
+    pygame.K_RIGHT: {'name': 'right', 'movement': Point(1, 0), 'opposite': 'left'},
+    pygame.K_DOWN: {'name': 'down', 'movement': Point(0, 1), 'opposite': 'up'},
+    pygame.K_LEFT: {'name': 'left', 'movement': Point(-1, 0), 'opposite': 'right'}
+  }
 
   def __init__(self, position, direction='right'):
     self.__squares = [Square(self.COLOR, position)]
-    self.__direction = direction
+    self.__direction = self.DIRECTIONS[pygame.K_RIGHT]
     self.is_alive = True
 
   def move(self, food):
-    new_square = Square(self.COLOR, self.__squares[-1].position + self.MOVEMENT[self.__direction])
+    new_square = Square(self.COLOR, self.__squares[-1].position + self.__direction['movement'])
 
     if (new_square in self.__squares or
     new_square.position.x < 0 or new_square.position.x >= WIDTH or
@@ -62,9 +67,9 @@ class Snake:
 
     return new_square.position
 
-  def turn(self, direction):
-    if (self.DIRECTION.index(self.__direction) != (self.DIRECTION.index(direction) + 2) % 4):
-      self.__direction = direction
+  def turn(self, key):
+    if (self.DIRECTIONS[key]['name'] != self.__direction['opposite']):
+      self.__direction = self.DIRECTIONS[key]
 
   def draw(self, surface):
     for square in self.__squares:
@@ -115,15 +120,8 @@ def main(win):
         run = False
         break
 
-      if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_UP:
-          snake.turn('up')
-        elif event.key == pygame.K_RIGHT:
-          snake.turn('right')
-        elif event.key == pygame.K_DOWN:
-          snake.turn('down')
-        elif event.key == pygame.K_LEFT:
-          snake.turn('left')
+      if (event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS):
+        snake.turn(event.key)
 
     if snake.move(food) == food.square.position:
       food = Food()
