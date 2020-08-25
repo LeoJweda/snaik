@@ -31,9 +31,9 @@ class Point:
     return self.__class__ == other.__class__ and self.x == other.x and self.y == other.y
 
 class Square:
-  def __init__(self, position, color):
-    self.position = position
+  def __init__(self, color, position):
     self.__color = color
+    self.position = position
 
   def __eq__(self, other):
     return self.__class__ == other.__class__ and self.position == other.position
@@ -55,24 +55,24 @@ class Snake:
   MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
 
   def __init__(self, position, direction='right'):
-    self.__squares = [Square(position, SNAKE_COLOR)]
+    self.__squares = [Square(SNAKE_COLOR, position)]
     self.__direction = direction
     self.is_alive = True
 
   def move(self, food):
-    new_square = Square(self.__squares[-1].position + self.MOVEMENT[self.__direction], SNAKE_COLOR)
+    new_square = Square(SNAKE_COLOR, self.__squares[-1].position + self.MOVEMENT[self.__direction])
 
     if (new_square in self.__squares or
     new_square.position.x < 0 or new_square.position.x > WIDTH or
     new_square.position.y < 0 or new_square.position.y > HEIGHT):
       self.is_alive = False
 
-    if new_square.position == food.square.position:
-      food.eat()
-    else:
+    if new_square.position != food.square.position:
       self.__squares.pop(0)
 
     self.__squares.append(new_square)
+
+    return new_square.position
 
   def turn(self, direction):
     if (self.DIRECTION.index(self.__direction) != (self.DIRECTION.index(direction) + 2) % 4):
@@ -83,16 +83,11 @@ class Snake:
       square.draw(surface)
 
 class Food:
-  def __init__(self, position):
-    self.square = Square(position, FOOD_COLOR)
-    self.is_eaten = False
-
-  def eat(self):
-    self.is_eaten = True
+  def __init__(self):
+    self.square = Square(FOOD_COLOR, Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
 
   def draw(self, surface):
-    if not self.is_eaten:
-      self.square.draw(surface)
+    self.square.draw(surface)
 
 def draw_window(screen, snake, food):
   screen.fill(BACKGROUND_COLOR)
@@ -105,7 +100,7 @@ def draw_window(screen, snake, food):
 
 def main(win):
   snake = Snake(Point(WIDTH / 2, HEIGHT / 2))
-  food = Food(Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
+  food = Food()
 
   clock = pygame.time.Clock()
 
@@ -129,10 +124,8 @@ def main(win):
         elif event.key == pygame.K_LEFT:
           snake.turn('left')
 
-    snake.move(food)
-
-    if food.is_eaten:
-      food = Food(Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
+    if snake.move(food) == food.square.position:
+      food = Food()
 
     # Update your sprites
     draw_window(screen, snake, food)
