@@ -35,42 +35,42 @@ class Snake:
   MOVEMENT = {'up': Point(0, -1), 'right': Point(1, 0), 'down': Point(0, 1), 'left': Point(-1, 0)}
 
   def __init__(self, position, direction='right'):
-    self.squares = [position]
-    self.direction = direction
-    self.alive = True
+    self.__squares = [position]
+    self.__direction = direction
+    self.is_alive = True
 
   def move(self, food):
-    new_square = self.squares[-1] + self.MOVEMENT[self.direction]
+    new_square = self.__squares[-1] + self.MOVEMENT[self.__direction]
 
-    if (new_square in self.squares or
+    if (new_square in self.__squares or
     new_square.x < 0 or new_square.x > WIDTH or new_square.y < 0 or new_square.y > HEIGHT):
-      self.alive = False
+      self.is_alive = False
 
     if new_square == food.position:
       food.eat()
     else:
-      self.squares.pop(0)
+      self.__squares.pop(0)
 
-    self.squares.append(new_square)
+    self.__squares.append(new_square)
 
   def turn(self, direction):
-    if (self.DIRECTION.index(self.direction) != (self.DIRECTION.index(direction) + 2) % 4):
-      self.direction = direction
+    if (self.DIRECTION.index(self.__direction) != (self.DIRECTION.index(direction) + 2) % 4):
+      self.__direction = direction
 
   def draw(self, screen):
-    for square in self.squares:
+    for square in self.__squares:
       draw_square(screen, SNAKE_COLOR, square)
 
 class Food:
   def __init__(self, position):
     self.position = position
-    self.eaten = False
+    self.is_eaten = False
 
   def eat(self):
-    self.eaten = True
+    self.is_eaten = True
 
   def draw(self, screen):
-    if not self.eaten:
+    if not self.is_eaten:
       draw_square(screen, FOOD_COLOR, self.position)
 
 def draw_square(surface, color, position):
@@ -88,7 +88,7 @@ def draw_square(surface, color, position):
 def draw_window(screen, snake, food):
   screen.fill(BACKGROUND_COLOR)
 
-  if snake.alive:
+  if snake.is_alive:
     snake.draw(screen)
     food.draw(screen)
 
@@ -122,7 +122,7 @@ def main(win):
 
     snake.move(food)
 
-    if food.eaten:
+    if food.is_eaten:
       food = Food(Point(random.randrange(0, WIDTH), y = random.randrange(0, HEIGHT)))
 
     # Update your sprites
