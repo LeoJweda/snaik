@@ -3,8 +3,7 @@ import pygame
 
 class Point:
   def __init__(self, x, y):
-    self.x = x
-    self.y = y
+    self.x, self.y = x, y
 
   def __add__(self, other):
     return Point(self.x + other.x, self.y + other.y)
@@ -15,7 +14,6 @@ class Point:
 class Square:
   SQUARE_BORDER_WIDTH = 2
   SQUARE_SIDE_LENGTH = 20
-
   SQUARE_TOTAL_SIDE_LENGTH = SQUARE_SIDE_LENGTH + SQUARE_BORDER_WIDTH * 2
 
   def __init__(self, color, position):
@@ -26,20 +24,15 @@ class Square:
     return self.__class__ == other.__class__ and self.position == other.position
 
   def draw(self, surface):
-    pygame.draw.rect(
-      surface,
-      self.__color,
-      (
-        self.position.x * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
-        self.position.y * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
-        self.SQUARE_SIDE_LENGTH,
-        self.SQUARE_SIDE_LENGTH
-      )
-    )
+    pygame.draw.rect(surface, self.__color, (
+      self.position.x * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
+      self.position.y * self.SQUARE_TOTAL_SIDE_LENGTH + self.SQUARE_BORDER_WIDTH,
+      self.SQUARE_SIDE_LENGTH,
+      self.SQUARE_SIDE_LENGTH
+    ))
 
 class Snake:
   COLOR = '#000000'
-
   DIRECTIONS = {
     pygame.K_UP: {'name': 'up', 'movement': Point(0, -1), 'opposite': 'down'},
     pygame.K_RIGHT: {'name': 'right', 'movement': Point(1, 0), 'opposite': 'left'},
@@ -88,49 +81,59 @@ BACKGROUND_COLOR = '#ffffff'
 
 HEIGHT = 30
 WIDTH = 40
-
 SCREEN_HEIGHT = HEIGHT * Square.SQUARE_TOTAL_SIDE_LENGTH
 SCREEN_WIDTH = WIDTH * Square.SQUARE_TOTAL_SIDE_LENGTH
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Snaik")
 
-def draw_window(screen, snake, food):
-  screen.fill(BACKGROUND_COLOR)
+pygame.font.init()
+FONT = pygame.font.Font(pygame.font.get_default_font(), 60)
 
-  if snake.is_alive:
-    snake.draw(screen)
-    food.draw(screen)
+class Game:
+  def __init__(self):
+    self.__clock = pygame.time.Clock()
+    self.__reset()
 
-  pygame.display.update()
+  def run(self):
+    while True:
+      pygame.time.delay(120)
+      self.__clock.tick(120)
 
-def main(win):
-  snake = Snake(Point(WIDTH / 2, HEIGHT / 2))
-  food = Food()
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          pygame.quit()
+          quit()
 
-  clock = pygame.time.Clock()
+        if self.snake.is_alive and event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS:
+          self.__next_directions.append(event.key)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+          self.__reset()
 
-  run = True
-  next_directions = []
-  while run:
-    pygame.time.delay(120)
-    clock.tick(120)
+      if self.snake.is_alive:
+        if (len(self.__next_directions) > 0):
+          self.snake.turn(self.__next_directions.pop())
 
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        run = False
-        break
+        if self.snake.move(self.food) == self.food.square.position:
+          self.food = Food()
 
-      if (event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS):
-        next_directions.append(event.key)
+      self.__draw_window()
 
-    if (len(next_directions) > 0):
-      snake.turn(next_directions.pop())
+  def __reset(self):
+    self.__next_directions = []
+    self.snake = Snake(Point(WIDTH / 2, HEIGHT / 2))
+    self.food = Food()
 
-    if snake.move(food) == food.square.position:
-      food = Food()
+  def __draw_window(self):
+    screen.fill(BACKGROUND_COLOR)
 
-    # Update your sprites
-    draw_window(screen, snake, food)
+    if self.snake.is_alive:
+      self.snake.draw(screen)
+      self.food.draw(screen)
+    else:
+      text_label = FONT.render("Press Space to Restart", 1, '#000000')
+      screen.blit(text_label, (SCREEN_WIDTH / 2 - text_label.get_width() / 2, 500))
 
-main(screen)
+    pygame.display.update()
+
+Game().run()
