@@ -96,7 +96,7 @@ class Game:
       self.__draw()
 
   def __reset(self):
-    self.__next_direction = None
+    self.__direction_key = None
     self.__snake = Snake(Point(self.WIDTH / 2, self.HEIGHT / 2))
     self.__generate_food()
 
@@ -110,13 +110,13 @@ class Game:
         quit()
 
       if self.__snake.is_alive and event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS:
-        self.__next_direction = event.key
+        self.__direction_key = event.key
       elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
         self.__reset()
 
   def __tick(self):
     if self.__snake.is_alive:
-      if self.__snake.move(self.__next_direction) == self.__food.position:
+      if self.__snake.move(self.__direction_key) == self.__food.position:
         self.__generate_food()
       else:
         self.__snake.shrink()
