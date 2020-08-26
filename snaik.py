@@ -45,7 +45,10 @@ class Snake:
     self.__direction = self.DIRECTIONS[pygame.K_RIGHT]
     self.is_alive = True
 
-  def move(self):
+  def move(self, key):
+    if (key in self.DIRECTIONS and self.DIRECTIONS[key]['name'] != self.__direction['opposite']):
+      self.__direction = self.DIRECTIONS[key]
+
     new_square = Square(self.COLOR, self.__squares[-1].position + self.__direction['movement'])
 
     if (new_square in self.__squares or
@@ -56,10 +59,6 @@ class Snake:
     self.__squares.append(new_square)
 
     return new_square.position
-
-  def turn(self, key):
-    if (self.DIRECTIONS[key]['name'] != self.__direction['opposite']):
-      self.__direction = self.DIRECTIONS[key]
 
   def shrink(self):
     self.__squares.pop(0)
@@ -100,33 +99,34 @@ class Game:
       pygame.time.delay(120)
       self.__clock.tick(120)
 
-      for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-          pygame.quit()
-          quit()
+      self.__handle_events()
+      self.__tick()
+      self.__draw()
 
-        if self.snake.is_alive and event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS:
-          self.__next_directions.append(event.key)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-          self.__reset()
+  def __handle_events(self):
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        pygame.quit()
+        quit()
 
-      if self.snake.is_alive:
-        if (len(self.__next_directions) > 0):
-          self.snake.turn(self.__next_directions.pop())
+      if self.snake.is_alive and event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS:
+        self.__next_direction = event.key
+      elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        self.__reset()
 
-        if self.snake.move() == self.food.square.position:
-          self.food = Food()
-        else:
-          self.snake.shrink()
-
-      self.__draw_window()
+  def __tick(self):
+    if self.snake.is_alive:
+      if self.snake.move(self.__next_direction) == self.food.square.position:
+        self.food = Food()
+      else:
+        self.snake.shrink()
 
   def __reset(self):
-    self.__next_directions = []
+    self.__next_direction = None
     self.snake = Snake(Point(WIDTH / 2, HEIGHT / 2))
     self.food = Food()
 
-  def __draw_window(self):
+  def __draw(self):
     screen.fill(BACKGROUND_COLOR)
 
     if self.snake.is_alive:
