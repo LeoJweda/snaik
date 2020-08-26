@@ -45,16 +45,13 @@ class Snake:
     self.__direction = self.DIRECTIONS[pygame.K_RIGHT]
     self.is_alive = True
 
-  def move(self, food):
+  def move(self):
     new_square = Square(self.COLOR, self.__squares[-1].position + self.__direction['movement'])
 
     if (new_square in self.__squares or
     new_square.position.x < 0 or new_square.position.x >= WIDTH or
     new_square.position.y < 0 or new_square.position.y >= HEIGHT):
       self.is_alive = False
-
-    if new_square.position != food.square.position:
-      self.__squares.pop(0)
 
     self.__squares.append(new_square)
 
@@ -63,6 +60,9 @@ class Snake:
   def turn(self, key):
     if (self.DIRECTIONS[key]['name'] != self.__direction['opposite']):
       self.__direction = self.DIRECTIONS[key]
+
+  def shrink(self):
+    self.__squares.pop(0)
 
   def draw(self, surface):
     for square in self.__squares:
@@ -114,8 +114,10 @@ class Game:
         if (len(self.__next_directions) > 0):
           self.snake.turn(self.__next_directions.pop())
 
-        if self.snake.move(self.food) == self.food.square.position:
+        if self.snake.move() == self.food.square.position:
           self.food = Food()
+        else:
+          self.snake.shrink()
 
       self.__draw_window()
 
