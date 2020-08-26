@@ -131,7 +131,7 @@ class Game:
       self.snake.draw(screen)
       self.food.draw(screen)
     else:
-      text_label = FONT.render("Press Space to Restart", 1, '#000000')
+      text_label = FONT.render("Press Space to restart", 1, '#000000')
       screen.blit(text_label, (SCREEN_WIDTH / 2 - text_label.get_width() / 2, 500))
 
     pygame.display.update()
