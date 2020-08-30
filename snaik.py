@@ -108,11 +108,11 @@ class Game:
       if event.type == pygame.QUIT:
         pygame.quit()
         quit()
-
-      if self.__snake.is_alive and event.type == pygame.KEYDOWN and event.key in Snake.DIRECTIONS:
-        self.__direction_key = event.key
-      elif not self.__snake.is_alive and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-        self.__reset()
+      elif event.type == pygame.KEYDOWN:
+        if self.__snake.is_alive and event.key in Snake.DIRECTIONS:
+          self.__direction_key = event.key
+        elif not self.__snake.is_alive and event.key == pygame.K_SPACE:
+          self.__reset()
 
   def __tick(self):
     if self.__snake.is_alive:
